@@ -61,8 +61,9 @@ class EnlistmentsController < SettingsController
   end
 
   def initialize_repository
-    @repository_class = safe_constantize(params[:repository][:type]).get_compatible_class(params[:repository][:url])
-    @repository = @repository_class.new(repository_params)
+    safe_repository_url = params[:repository][:url].chomp('/')
+    @repository_class = safe_constantize(params[:repository][:type]).get_compatible_class(safe_repository_url)
+    @repository = @repository_class.new(repository_params.merge(url: safe_repository_url))
   end
 
   def initialize_code_location

@@ -249,6 +249,19 @@ describe 'EnlistmentsControllerTest' do
       flash[:notice].must_equal I18n.t('enlistments.create.notice', url: code_location.repository.url)
     end
 
+    it 'must handle duplicate urls with trailing backslash' do
+      CodeLocation.any_instance.stubs(:bypass_url_validation)
+      GitRepository.new.source_scm_class.any_instance.stubs(:validate_server_connection)
+
+      assert_no_difference ['Repository.count', 'Enlistment.count'] do
+        post :create, project_id: @project_id, code_location: code_location.attributes,
+                      repository: code_location.repository.attributes.merge(url: "#{code_location.repository.url}/")
+      end
+
+      must_redirect_to action: :index
+      flash[:notice].must_equal I18n.t('enlistments.create.notice', url: code_location.repository.url)
+    end
+
     it 'must handle duplicate svn urls when passed type is svn_sync' do
       repository = create(:svn_repository)
       create(:enlistment, project: Project.find_by(vanity_url: @project_id),
