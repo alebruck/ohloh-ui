@@ -25,8 +25,8 @@ class ProjectSecuritySet < ActiveRecord::Base
     sql = <<-SQL
       select R.id, R.version, R.released_on, sum (case V.severity when 0 then 1 else 0 end) low,
       sum (case V.severity when 1 then 1 else 0 end) medium, sum (case V.severity when 2 then 1 else 0 end) high
-      from releases R left outer join releases_vulnerabilities RV on RV.release_id = R.id
-      left outer join vulnerabilities V on V.id = RV.vulnerability_id #{condition} group by R.id order by R.released_on asc;
+      from releases R inner join releases_vulnerabilities RV on RV.release_id = R.id
+      inner join vulnerabilities V on V.id = RV.vulnerability_id #{condition} group by R.id order by R.released_on asc;
     SQL
     self.class.find_by_sql(sql)
   end
